@@ -63,6 +63,16 @@ export interface ScanProgress {
   currentPhoto: string | null;
 }
 
+export interface Share {
+  id: string;
+  user_id: string;
+  resource_type: 'photo' | 'album' | 'video';
+  resource_id: string;
+  token: string;
+  expires_at: string;
+  created_at: string;
+}
+
 export interface R2Config {
   endpoint: string;
   accessKeyId: string;
