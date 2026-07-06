@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Providers } from '@/components/providers';
+import { NavBar } from '@/components/nav-bar';
 
 export const metadata: Metadata = {
   title: 'Photos',
@@ -22,7 +23,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="flex min-h-dvh">
+            <NavBar />
+            <main className="flex-1 pb-16 md:pb-0">{children}</main>
+          </div>
+        </Providers>
       </body>
     </html>
   );
