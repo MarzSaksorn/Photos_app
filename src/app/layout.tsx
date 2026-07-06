@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Providers } from '@/components/providers';
 import { NavBar } from '@/components/nav-bar';
+import { PWARegister } from './pwa-register';
 
 export const metadata: Metadata = {
   title: 'Photos',
@@ -24,6 +25,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Providers>
+          <PWARegister />
           <div className="flex min-h-dvh">
             <NavBar />
             <main className="flex-1 pb-16 md:pb-0">{children}</main>
