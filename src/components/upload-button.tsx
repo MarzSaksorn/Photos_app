@@ -1,13 +1,21 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { useUpload } from '@/hooks/use-upload';
+import { useQueryClient } from '@tanstack/react-query';
 import { IconPlus } from '@tabler/icons-react';
 import { cn } from '@/lib/utils';
 
 export function UploadButton({ className }: { className?: string }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
   const { state, uploadFile } = useUpload();
+
+  useEffect(() => {
+    if (state.status === 'done') {
+      queryClient.invalidateQueries({ queryKey: ['photos'] });
+    }
+  }, [state.status, queryClient]);
 
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);

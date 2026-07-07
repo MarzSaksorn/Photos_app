@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { UploadProgress } from '@/components/upload-progress';
 import { cn } from '@/lib/utils';
 import { compressImage } from '@/lib/image-compression';
@@ -28,6 +29,7 @@ function generateId(): string {
 
 export default function UploadPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<QueuedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -170,7 +172,7 @@ export default function UploadPage() {
         <div className="flex flex-col items-center gap-4 py-12">
           <p className="text-lg font-medium">{doneCount} file{doneCount !== 1 ? 's' : ''} uploaded</p>
           <button
-            onClick={() => router.push('/photos')}
+            onClick={() => { queryClient.invalidateQueries({ queryKey: ['photos'] }); router.push('/photos'); }}
             className="rounded-md bg-foreground px-6 py-2 text-sm text-background hover:opacity-90"
           >
             View Photos

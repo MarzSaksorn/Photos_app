@@ -22,11 +22,15 @@ export function PhotoDetail({ photo, fullUrl }: PhotoDetailProps) {
     router.push('/photos');
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
+    const res = await fetch(fullUrl);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = fullUrl;
+    a.href = blobUrl;
     a.download = photo.original_filename;
     a.click();
+    URL.revokeObjectURL(blobUrl);
   };
 
   return (
