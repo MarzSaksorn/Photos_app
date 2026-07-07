@@ -12,6 +12,7 @@ export function R2ConfigForm() {
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<'idle' | 'success' | 'error'>('idle');
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
 
@@ -35,23 +36,34 @@ export function R2ConfigForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setSaveError(null);
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) {
+      setSaveError('You must be signed in to save settings.');
+      setSaving(false);
+      return;
+    }
+
+    const config = {
+      endpoint: endpoint.replace(/\/$/, ''),
+      accessKeyId,
+      secretAccessKey,
+      bucketName,
+      publicUrl: `${endpoint.replace(/\/$/, '')}/${bucketName}`,
+    };
 
     const { error } = await supabase.from('users').upsert({
       id: user.id,
-      r2_config: {
-        endpoint: endpoint.replace(/\/$/, ''),
-        accessKeyId,
-        secretAccessKey,
-        bucketName,
-        publicUrl: `${endpoint.replace(/\/$/, '')}/${bucketName}`,
-      },
+      r2_config: config,
     });
 
     setSaving(false);
-    if (!error) router.push('/photos');
+    if (error) {
+      setSaveError(error.message);
+    } else {
+      router.push('/photos');
+    }
   };
 
   return (
@@ -107,9 +119,10 @@ export function R2ConfigForm() {
       </button>
       {testResult === 'success' && <p className="text-sm text-green-600">Connection OK</p>}
       {testResult === 'error' && <p className="text-sm text-red-600">Connection failed</p>}
+      {saveError && <p className="text-sm text-red-600">{saveError}</p>}
       <button
         type="submit"
-        disabled={saving || testResult !== 'success'}
+        disabled={saving}
         className="w-full rounded-md bg-foreground px-3 py-2 text-sm text-background hover:opacity-90 disabled:opacity-50"
       >
         {saving ? 'Saving...' : 'Save & Start'}

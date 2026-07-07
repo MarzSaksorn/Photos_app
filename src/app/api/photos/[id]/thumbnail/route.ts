@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase-server';
-import { getR2Client } from '@/lib/r2';
-import { GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { isR2Configured, getR2Client, createR2ClientFromConfig, getPresignedDownloadUrl } from '@/lib/r2';
 
 export async function GET(
   request: Request,
@@ -23,10 +21,27 @@ export async function GET(
 
   if (!photo) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  const client = getR2Client();
-  const bucket = process.env.CLOUDFLARE_R2_BUCKET || 'photos';
-  const command = new GetObjectCommand({ Bucket: bucket, Key: photo.r2_key });
-  const url = await getSignedUrl(client, command, { expiresIn: 3600 });
-
-  return NextResponse.redirect(url);
+  try {
+    let url: string;
+    if (isR2Configured()) {
+      const client = getR2Client();
+      const bucket = process.env.CLOUDFLARE_R2_BUCKET || 'photos';
+      url = await getPresignedDownloadUrl(client, bucket, photo.r2_key, 3600);
+    } else {
+      const { data: userData } = await supabase
+        .from('users')
+        .select('r2_config')
+        .eq('id', user.id)
+        .single();
+      if (!userData?.r2_config) {
+        return NextResponse.json({ error: 'R2 not configured' }, { status: 400 });
+      }
+      const config = userData.r2_config as { endpoint: string; accessKeyId: string; secretAccessKey: string; bucketName: string };
+      const client = createR2ClientFromConfig(config);
+      url = await getPresignedDownloadUrl(client, config.bucketName, photo.r2_key, 3600);
+    }
+    return NextResponse.redirect(url);
+  } catch {
+    return NextResponse.json({ error: 'Failed to generate thumbnail URL' }, { status: 500 });
+  }
 }
