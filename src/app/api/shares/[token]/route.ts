@@ -10,7 +10,7 @@ export async function GET(
 ) {
   const { token } = await params;
 
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
 
   const { data: share, error } = await supabase
     .from('shares')

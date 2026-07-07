@@ -5,9 +5,9 @@ import { AlbumGrid } from '@/components/album-grid';
 export const dynamic = 'force-dynamic';
 
 export default async function AlbumsPage() {
-  const supabase = createServerSupabase();
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) redirect('/login');
+  const supabase = await createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
 
   return (
     <div className="min-h-screen p-4">

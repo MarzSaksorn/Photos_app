@@ -5,7 +5,7 @@ import { insertPhoto } from '@/lib/db-helpers';
 import type { R2Config } from '@/types';
 
 export async function POST(request: Request) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (authError || !user) {

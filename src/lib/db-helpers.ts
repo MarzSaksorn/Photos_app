@@ -10,7 +10,7 @@ export interface PhotoInsert {
 }
 
 export async function insertPhoto(data: PhotoInsert) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const { data: photo, error } = await supabase
     .from('photos')
     .insert({

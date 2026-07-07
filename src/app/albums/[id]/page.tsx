@@ -7,15 +7,15 @@ export const dynamic = 'force-dynamic';
 export default async function AlbumDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  const supabase = createServerSupabase();
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) redirect('/login');
+  const supabase = await createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
 
   const { data: album } = await supabase
     .from('albums')
     .select('*')
     .eq('id', id)
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id)
     .single();
 
   if (!album) redirect('/albums');

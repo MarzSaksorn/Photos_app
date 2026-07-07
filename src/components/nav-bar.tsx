@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { IconPhoto, IconUsers, IconAlbum, IconSearch } from '@tabler/icons-react';
+import { IconPhoto, IconUsers, IconAlbum, IconSearch, IconSettings } from '@tabler/icons-react';
 import { cn } from '@/lib/utils';
+import { ThemeToggle } from './theme-toggle';
 
 const navItems = [
   { href: '/photos', label: 'Photos', icon: IconPhoto },
@@ -26,8 +27,8 @@ export function NavBar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex flex-1 flex-col items-center gap-0.5 py-2 text-xs',
-                isActive ? 'text-foreground' : 'text-muted-foreground'
+                'flex flex-1 flex-col items-center gap-0.5 py-2 text-xs transition-colors',
+                isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
               )}
             >
               <item.icon className="h-5 w-5" />
@@ -58,6 +59,19 @@ export function NavBar() {
             );
           })}
         </nav>
+        <div className="mt-auto flex flex-col gap-1 pt-4">
+          <Link
+            href="/settings"
+            className={cn(
+              'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
+              pathname.startsWith('/settings') ? 'bg-foreground text-background' : 'hover:bg-muted'
+            )}
+          >
+            <IconSettings className="h-4 w-4" />
+            Settings
+          </Link>
+          <ThemeToggle />
+        </div>
       </aside>
     </>
   );

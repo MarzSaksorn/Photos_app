@@ -3,20 +3,20 @@ import { redirect } from 'next/navigation';
 import LoginPage from '@/app/login/page';
 
 export default async function Home() {
-  const supabase = createServerSupabase();
-  const { data: { session } } = await supabase.auth.getSession();
+  const supabase = await createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     return <LoginPage />;
   }
 
-  const { data: user } = await supabase
+  const { data: r2Config } = await supabase
     .from('users')
     .select('r2_config')
-    .eq('id', session.user.id)
+    .eq('id', user.id)
     .single();
 
-  if (!user?.r2_config) {
+  if (!r2Config?.r2_config) {
     redirect('/settings');
   }
 
