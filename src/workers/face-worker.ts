@@ -10,6 +10,19 @@ async function loadModels() {
 
   const faceapi = (self as any).faceapi;
 
+  // Initialize env for Web Worker (face-api can't auto-detect worker environment)
+  faceapi.env.setEnv(faceapi.env.createNodejsEnv());
+  faceapi.env.monkeyPatch({
+    Canvas: OffscreenCanvas,
+    CanvasRenderingContext2D: OffscreenCanvasRenderingContext2D,
+    Image: class {},
+    ImageData: ImageData,
+    Video: class {},
+    createCanvasElement: () => new OffscreenCanvas(100, 100),
+    createImageElement: () => new OffscreenCanvas(0, 0),
+    createVideoElement: () => ({}),
+  });
+
   await Promise.all([
     faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
     faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
