@@ -34,7 +34,12 @@ export function createR2ClientFromConfig(config: R2Config): S3Client {
 }
 
 export function isR2Configured(): boolean {
-  return !!(process.env.CLOUDFLARE_R2_ENDPOINT && process.env.CLOUDFLARE_R2_ACCESS_KEY_ID && process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY);
+  const endpoint = process.env.CLOUDFLARE_R2_ENDPOINT;
+  const key = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID;
+  const secret = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY;
+  if (!endpoint || !key || !secret) return false;
+  if (endpoint.includes('localhost') || key === 'placeholder' || secret === 'placeholder') return false;
+  return true;
 }
 
 export async function getPresignedUploadUrl(
