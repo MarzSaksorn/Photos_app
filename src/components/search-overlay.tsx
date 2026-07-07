@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { IconArrowLeft, IconSearch, IconPhoto, IconUsers, IconAlbum } from '@tabler/icons-react';
 import type { Photo, FaceGroup, Album } from '@/types';
+import { SkeletonGrid, SkeletonText } from './ui/skeleton';
 
 interface SearchResults {
   photos: Photo[];
@@ -98,14 +99,15 @@ export function SearchOverlay() {
       <div className="flex-1 px-4 py-4">
         {loading && (
           <div className="space-y-6">
-            {[1, 2, 3].map((section) => (
+            {[0, 1, 2].map((section) => (
               <div key={section}>
-                <div className="mb-3 h-5 w-20 animate-pulse rounded bg-muted" />
-                <div className="grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="aspect-square animate-pulse rounded-md bg-muted" />
-                  ))}
+                <div className="mb-3">
+                  <SkeletonText width="5rem" height="1.25rem" />
                 </div>
+                <SkeletonGrid
+                  count={6}
+                  cols="grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6"
+                />
               </div>
             ))}
           </div>

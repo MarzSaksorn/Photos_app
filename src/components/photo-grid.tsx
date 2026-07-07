@@ -4,6 +4,7 @@ import { usePhotos } from '@/hooks/use-photos';
 import { PhotoCard } from './photo-card';
 import { useRef, useCallback } from 'react';
 import { format } from 'date-fns';
+import { SkeletonGrid } from './ui/skeleton';
 
 export function PhotoGrid() {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = usePhotos();
@@ -25,10 +26,11 @@ export function PhotoGrid() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div key={i} className="aspect-square animate-pulse rounded-md bg-muted" />
-        ))}
+      <div className="px-1">
+        <SkeletonGrid
+          count={20}
+          cols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+        />
       </div>
     );
   }

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAlbums } from '@/hooks/use-albums';
 import { AlbumCard } from './album-card';
 import { CreateAlbumDialog } from './create-album-dialog';
+import { SkeletonGrid } from './ui/skeleton';
 
 export function AlbumGrid() {
   const { data: albums, isLoading } = useAlbums();
@@ -13,11 +14,10 @@ export function AlbumGrid() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="aspect-square animate-pulse rounded-md bg-muted" />
-        ))}
-      </div>
+      <SkeletonGrid
+        count={10}
+        cols="grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+      />
     );
   }
 

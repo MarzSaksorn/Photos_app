@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Album } from '@/types';
 import { useAlbumPhotos, useUpdateAlbum, useDeleteAlbum, useRemovePhotoFromAlbum } from '@/hooks/use-albums';
+import { SkeletonGrid, SkeletonText } from '@/components/ui/skeleton';
 
 interface AlbumDetailClientProps {
   album: Album;
@@ -99,10 +100,15 @@ export function AlbumDetailClient({ album }: AlbumDetailClientProps) {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="aspect-square animate-pulse rounded-md bg-muted" />
-          ))}
+        <div>
+          <div className="mb-6 space-y-2">
+            <SkeletonText width="8rem" />
+            <SkeletonText width="4rem" height="0.75rem" />
+          </div>
+          <SkeletonGrid
+            count={12}
+            cols="grid-cols-2 gap-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+          />
         </div>
       ) : !photos?.length ? (
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
