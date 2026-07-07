@@ -51,7 +51,7 @@ export function useFaceScan() {
     if (workerRef.current) {
       workerRef.current.terminate();
     }
-    workerRef.current = new Worker(new URL('@/workers/face-worker.ts', import.meta.url));
+    workerRef.current = new Worker(new URL('../workers/face-worker', import.meta.url));
     const worker = workerRef.current;
 
     worker.onmessage = async (e) => {
