@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { compressImage } from '@/lib/image-compression';
 
 interface UploadState {
   status: 'idle' | 'uploading' | 'done' | 'error';
@@ -19,21 +20,24 @@ export function useUpload() {
     setState({ status: 'uploading', progress: 0, currentFile: file.name });
 
     try {
-      // 1. Get presigned URL (also creates the photo record)
+      // 1. Compress image losslessly
+      const { blob: uploadBlob, mimeType } = await compressImage(file);
+
+      // 2. Get presigned URL (also creates the photo record)
       const res = await fetch('/api/upload/presign', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           filename: file.name,
-          contentType: file.type,
-          fileSize: file.size,
+          contentType: mimeType,
+          fileSize: uploadBlob.size,
         }),
       });
 
       if (!res.ok) throw new Error('Failed to get upload URL');
       const { url, photoId } = await res.json();
 
-      // 2. Upload directly to R2
+      // 3. Upload directly to R2
       const xhr = new XMLHttpRequest();
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {
@@ -45,8 +49,8 @@ export function useUpload() {
         xhr.onload = () => resolve();
         xhr.onerror = () => reject(new Error('Upload failed'));
         xhr.open('PUT', url);
-        xhr.setRequestHeader('Content-Type', file.type);
-        xhr.send(file);
+        xhr.setRequestHeader('Content-Type', mimeType);
+        xhr.send(uploadBlob);
       });
 
       // 3. Extract EXIF-like metadata from the file

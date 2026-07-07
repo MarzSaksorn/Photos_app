@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { UploadProgress } from '@/components/upload-progress';
 import { cn } from '@/lib/utils';
+import { compressImage } from '@/lib/image-compression';
 
 const RAW_EXTENSIONS = '.cr2,.nef,.arw,.dng,.raf,.orf,.rw2,.raw';
 const RAW_EXTENSION_LIST = RAW_EXTENSIONS.split(',');
@@ -88,14 +89,17 @@ export default function UploadPage() {
     );
 
     try {
-      // 1. Get presigned URL
+      // 1. Compress image losslessly
+      const { blob: uploadBlob, mimeType } = await compressImage(qf.file);
+
+      // 2. Get presigned URL
       const res = await fetch('/api/upload/presign', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           filename: qf.file.name,
-          contentType: qf.file.type || 'application/octet-stream',
-          fileSize: qf.file.size,
+          contentType: mimeType,
+          fileSize: uploadBlob.size,
         }),
       });
 
@@ -106,7 +110,7 @@ export default function UploadPage() {
 
       const { url } = await res.json();
 
-      // 2. Upload to R2 via XHR for progress tracking
+      // 3. Upload to R2 via XHR for progress tracking
       await new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.upload.onprogress = (e) => {
@@ -126,8 +130,8 @@ export default function UploadPage() {
         };
         xhr.onerror = () => reject(new Error('Upload failed'));
         xhr.open('PUT', url);
-        xhr.setRequestHeader('Content-Type', qf.file.type || 'application/octet-stream');
-        xhr.send(qf.file);
+        xhr.setRequestHeader('Content-Type', mimeType);
+        xhr.send(uploadBlob);
       });
 
       setFiles((prev) =>
