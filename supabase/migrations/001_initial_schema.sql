@@ -1,6 +1,3 @@
--- Enable pgvector extension
-CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA extensions;
-
 -- Users table (syncs with Supabase Auth)
 CREATE TABLE public.users (
   id UUID PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
@@ -90,7 +87,7 @@ CREATE TABLE public.faces (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   photo_id UUID REFERENCES public.photos(id) ON DELETE CASCADE NOT NULL,
   user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
-  embedding vector(128),
+  embedding extensions.vector(128),
   bounding_box JSONB,
   cluster_id UUID REFERENCES public.face_clusters(id) ON DELETE SET NULL
 );
@@ -101,7 +98,7 @@ CREATE POLICY "Users can CRUD own faces" ON public.faces
   FOR ALL USING (auth.uid() = user_id);
 
 CREATE INDEX idx_faces_user_cluster ON public.faces (user_id, cluster_id);
-CREATE INDEX idx_faces_embedding ON public.faces USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+CREATE INDEX idx_faces_embedding ON public.faces USING ivfflat (embedding extensions.vector_cosine_ops) WITH (lists = 100);
 
 -- Albums
 CREATE TABLE public.albums (
